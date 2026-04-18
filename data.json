@@ -1,0 +1,16 @@
+{
+    "MASTER_COURSE_DATA": {
+        "English for Success (Business English Communication Skills)": ["-", "5", "EfS(BECS) (L) -RK", "GF-Mr. Raman Kharab"],
+        "Python Programming": ["CS-PC-501", "5", "PP - SKC", "Dr. Sunita Kumari Chaurasia"],
+        "Web Development": ["CS-PC-502", "3", "WD - RS", "Ms. Richa Sharma (Guest Faculty)"],
+        "Computer Hardware & Maintenance": ["CS-PC-503", "4", "CH&M - RPY", "Sh. Ravi Prakash Yadav/ Mr. Amit Kadian"],
+        "Elective (Cryptography and Network Security)": ["CS-PE-501", "2", "Elective - AJ", "Ms. Apurva Jain (Guest Faculty)/ Ms. Shushma Yadav"],
+        "Minor Project": ["CS-PR-501", "1", "MP", "All Faculties"],
+        "Summer Training Evaluation": ["CS-SI-501", "2", "STE - RPY", "Mr. Amit Kadian"]
+    },
+    "TIME_SLOTS": [
+        "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00",
+        "12:00 - 13:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
+    ],
+    "DAYS": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+}
