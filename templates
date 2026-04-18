@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSEU Timetable Designer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #5f6368;
+            --success: #1e8e3e;
+            --danger: #d93025;
+            --warning: #f9ab00;
+            --bg: #f8f9fa;
+            --shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: #202124;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: var(--shadow);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .header h2 { color: var(--primary); margin: 0; font-size: 28px; letter-spacing: -0.5px; }
+        .header p { color: var(--secondary); margin-top: 5px; }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px;
+        }
+
+        .input-group { display: flex; flex-direction: column; }
+        
+        label { 
+            font-weight: 600; 
+            font-size: 13px; 
+            margin-bottom: 8px; 
+            color: var(--secondary);
+            text-transform: uppercase;
+        }
+
+        select, input { 
+            padding: 12px; 
+            border: 1.5px solid #dadce0; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s, filter 0.2s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; width: 100%; font-size: 16px; margin-top: 20px; height: 50px; }
+        .btn-outline { background: white; border: 1.5px solid #dadce0; color: var(--secondary); }
+        .btn-danger { background: #fce8e6; color: var(--danger); }
+        .btn-warning { background: var(--warning); color: white; margin-bottom: 20px;}
+
+        /* List Section */
+        #list-container { 
+            margin-top: 25px; 
+            border-radius: 12px; 
+            border: 1px solid #dadce0;
+            background: #fff;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .entry-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 15px 20px; 
+            border-bottom: 1px solid #eee;
+        }
+
+        .entry-item:last-child { border-bottom: none; }
+        .entry-info b { color: var(--primary); }
+        .delete-icon { color: var(--danger); cursor: pointer; padding: 5px; }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 12px; width: 400px;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fas fa-calendar-alt"></i> DSEU Timetable Designer</h2>
+        <p>Diploma in Computer Engineering - Section B</p>
+    </div>
+
+    <button class="btn btn-warning" onclick="toggleModal(true)">
+        <i class="fas fa-plus-circle"></i> Add New Course to Database
+    </button>
+    
+    <div class="grid">
+        <div class="input-group">
+            <label>Day of Week</label>
+            <select id="day">{% for d in config.DAYS %}<option>{{d}}</option>{% endfor %}</select>
+        </div>
+        <div class="input-group">
+            <label>Location / Room</label>
+            <input type="text" id="room" value="C-202">
+        </div>
+        <div class="input-group">
+            <label>Start Time</label>
+            <select id="start_t">{% for t in config.TIME_SLOTS %}<option>{{t}}</option>{% endfor %}</select>
+        </div>
+        <div class="input-group">
+            <label>End Time</label>
+            <select id="end_t">{% for t in config.TIME_SLOTS %}<option>{{t}}</option>{% endfor %}</select>
+        </div>
+        <div class="input-group" style="grid-column: span 1;">
+            <label>Subject</label>
+            <select id="course">
+                {% for name in config.MASTER_COURSE_DATA.keys() %}<option>{{name}}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Position (For Labs)</label>
+            <select id="pos"><option>Upper</option><option>Lower</option></select>
+        </div>
+    </div>
+
+    <div class="btn-box">
+        <button class="btn btn-primary" onclick="addEntry()">
+            <i class="fas fa-plus"></i> Add to List
+        </button>
+        <button class="btn btn-danger" onclick="clearEntries()">
+            <i class="fas fa-trash-alt"></i> Clear All
+        </button>
+    </div>
+
+    <div id="list-container">
+        <div style="padding: 20px; text-align: center; color: #999;">No classes added yet.</div>
+    </div>
+
+    <button class="btn btn-success" onclick="generateDoc()">
+        <i class="fas fa-file-word"></i> GENERATE WORD DOCUMENT
+    </button>
+</div>
+
+<div id="courseModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Add New Subject</h3>
+        <label>Course Name</label><input type="text" id="new_name" placeholder="e.g. Cyber Security" style="margin-bottom:15px">
+        <label>Course Code</label><input type="text" id="new_code" placeholder="e.g. CS-501" style="margin-bottom:15px">
+        <label>Accronym</label><input type="text" id="new_acr" placeholder="e.g. CS - AJ" style="margin-bottom:15px">
+        <label>Faculty</label><input type="text" id="new_fac" placeholder="Teacher Name" style="margin-bottom:20px">
+        
+        <div class="btn-box">
+            <button class="btn btn-primary" onclick="saveNewCourse()">Save</button>
+            <button class="btn btn-outline" onclick="toggleModal(false)">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let addedEntries = [];
+    const masterData = {{ config.MASTER_COURSE_DATA | tojson }};
+    const timeSlots = {{ config.TIME_SLOTS | tojson }};
+
+    function toggleModal(show) {
+        document.getElementById('courseModal').style.display = show ? 'flex' : 'none';
+    }
+
+    function addEntry() {
+        const course = document.getElementById('course').value;
+        const start = document.getElementById('start_t').value;
+        const end = document.getElementById('end_t').value;
+        
+        const acrBase = masterData[course][2].split(' - ')[0];
+        const isLec = timeSlots.indexOf(end) - timeSlots.indexOf(start) === 0;
+        const finalAcr = isLec ? `${acrBase} (L)` : `${acrBase} (P)`;
+
+        addedEntries.push({
+            day: document.getElementById('day').value,
+            start_t: start, end_t: end,
+            sub_full: course, acr: finalAcr,
+            room: document.getElementById('room').value,
+            pos: document.getElementById('pos').value,
+            is_lec: isLec
+        });
+        renderList();
+    }
+
+    function renderList() {
+        const container = document.getElementById('list-container');
+        if(addedEntries.length === 0) {
+            container.innerHTML = `<div style="padding: 20px; text-align: center; color: #999;">No classes added yet.</div>`;
+            return;
+        }
+        container.innerHTML = addedEntries.map((e, index) => `
+            <div class="entry-item">
+                <div class="entry-info">
+                    <b>${e.day}</b> | ${e.start_t} - ${e.end_t}<br>
+                    <small style="color: #666">${e.sub_full} (${e.acr})</small>
+                </div>
+                <i class="fas fa-times-circle delete-icon" onclick="removeEntry(${index})"></i>
+            </div>
+        `).join('');
+    }
+
+    function removeEntry(index) {
+        addedEntries.splice(index, 1);
+        renderList();
+    }
+
+    function clearEntries() {
+        if(confirm("Are you sure you want to clear the list?")) {
+            addedEntries = [];
+            renderList();
+        }
+    }
+
+    async function generateDoc() {
+        if(addedEntries.length === 0) {
+            alert("Please add at least one class first!");
+            return;
+        }
+        // [Same fetch logic as before]
+        const response = await fetch('/generate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({entries: addedEntries})
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "Designed_Timetable.docx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    }
+
+    // Modal dummy save (Logic handled by Python in a real scenario)
+    function saveNewCourse() {
+        alert("This will update data.json. Logic can be added to app.py!");
+        toggleModal(false);
+    }
+</script>
+
+</body>
+</html>
